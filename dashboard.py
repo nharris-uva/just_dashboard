@@ -107,28 +107,13 @@ with tab0:
     # Group Members Section
     st.subheader("👥 Group Members")
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-        **Member 1**
-        - Name: [Your Name]
-        - Role: [Your Role]
-        """)
-    
-    with col2:
-        st.markdown("""
-        **Member 2**
-        - Name: [Your Name]
-        - Role: [Your Role]
-        """)
-    
-    with col3:
-        st.markdown("""
-        **Member 3**
-        - Name: [Your Name]
-        - Role: [Your Role]
-        """)
+    st.markdown("""
+    1. Sabine Segaloff
+    2. Tianyin Mao
+    3. Mason Earp
+    4. Nicholas Thornton
+    5. Nate Harris
+    """)
     
     st.markdown("---")
     
@@ -937,26 +922,26 @@ with tab7:
     # Get statistics for the selected column
     col_data = df_num[selected_column]
     
-    # Create three columns for metrics
-    col1, col2, col3, col4, col5 = st.columns(5)
+    # Two column layout: histogram on left, stats on right
+    col1, col2 = st.columns([1.2, 1])
     
     with col1:
-        st.metric("Mean", f"{col_data.mean():.4f}")
+        # Histogram with box plot
+        st.subheader(f"Distribution of {selected_column}")
+        fig_hist = px.histogram(
+            df_num,
+            x=selected_column,
+            nbins=50,
+            title=f"Histogram of {selected_column}",
+            marginal="box",
+            labels={selected_column: selected_column}
+        )
+        st.plotly_chart(fig_hist, use_container_width=True)
+    
     with col2:
-        st.metric("Median", f"{col_data.median():.4f}")
-    with col3:
-        st.metric("Std Dev", f"{col_data.std():.4f}")
-    with col4:
-        st.metric("Min", f"{col_data.min():.4f}")
-    with col5:
-        st.metric("Max", f"{col_data.max():.4f}")
-    
-    # Display detailed statistics
-    st.subheader("Detailed Statistics")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
+        # Statistics table
+        st.subheader("Statistics")
+        
         stats_data = {
             'Statistic': [
                 'Count',
@@ -993,118 +978,47 @@ with tab7:
         }
         
         stats_df = pd.DataFrame(stats_data)
-        st.dataframe(stats_df, use_container_width=True, hide_index=True)
+        st.dataframe(stats_df, use_container_width=True, hide_index=True, height=560)
     
-    with col2:
-        st.write("**Missing Values:**")
-        missing_count = col_data.isnull().sum()
-        missing_pct = (missing_count / len(col_data)) * 100
-        
-        missing_data = {
-            'Metric': ['Missing Count', 'Missing %', 'Non-Missing Count'],
-            'Value': [
-                f"{missing_count}",
-                f"{missing_pct:.2f}%",
-                f"{col_data.count()}"
-            ]
-        }
-        
-        missing_df = pd.DataFrame(missing_data)
-        st.dataframe(missing_df, use_container_width=True, hide_index=True)
-    
-    # Distribution visualizations
-    st.subheader(f"Distribution of {selected_column}")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Histogram with KDE
-        fig_hist = px.histogram(
-            df_num,
-            x=selected_column,
-            nbins=50,
-            title=f"Histogram of {selected_column}",
-            marginal="box",
-            labels={selected_column: selected_column}
-        )
-        st.plotly_chart(fig_hist, use_container_width=True)
-    
-    with col2:
-        # Box plot
-        fig_box = px.box(
-            df_num,
-            y=selected_column,
-            title=f"Box Plot of {selected_column}",
-            labels={selected_column: selected_column}
-        )
-        st.plotly_chart(fig_box, use_container_width=True)
-    
-    # Q-Q Plot and correlation info
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Violin plot
-        fig_violin = px.violin(
-            df_num,
-            y=selected_column,
-            box=True,
-            title=f"Violin Plot of {selected_column}",
-            labels={selected_column: selected_column}
-        )
-        st.plotly_chart(fig_violin, use_container_width=True)
-    
-    with col2:
-        # Correlation with other columns
-        st.write("**Correlation with Other Columns:**")
-        correlations = df_num.corr()[selected_column].sort_values(ascending=False)
-        
-        # Create a correlation bar chart (excluding self-correlation)
-        corr_for_plot = correlations[correlations.index != selected_column]
-        
-        fig_corr = px.bar(
-            x=corr_for_plot.values,
-            y=corr_for_plot.index,
-            orientation='h',
-            title=f"Correlations with {selected_column}",
-            labels={'x': 'Correlation', 'y': 'Column'}
-        )
-        st.plotly_chart(fig_corr, use_container_width=True)
-    
-    # Additional insights
+    # Additional insights section below
+    st.markdown("---")
     st.subheader("Distribution Insights")
     
-    insights = []
+    col1, col2, col3 = st.columns(3)
     
-    # Skewness interpretation
-    skewness = col_data.skew()
-    if abs(skewness) < 0.5:
-        skew_text = "approximately symmetric"
-    elif skewness > 0:
-        skew_text = "right-skewed (positive skew)"
-    else:
-        skew_text = "left-skewed (negative skew)"
-    insights.append(f"**Skewness ({skewness:.4f})**: The distribution is {skew_text}")
+    with col1:
+        # Skewness interpretation
+        skewness = col_data.skew()
+        if abs(skewness) < 0.5:
+            skew_text = "approximately symmetric"
+        elif skewness > 0:
+            skew_text = "right-skewed (positive skew)"
+        else:
+            skew_text = "left-skewed (negative skew)"
+        st.markdown(f"**Skewness ({skewness:.4f})**")
+        st.write(f"Distribution is {skew_text}")
     
-    # Kurtosis interpretation
-    kurtosis = col_data.kurtosis()
-    if abs(kurtosis) < 1:
-        kurt_text = "normal-like tails"
-    elif kurtosis > 1:
-        kurt_text = "heavy tails (more outliers)"
-    else:
-        kurt_text = "light tails (fewer outliers)"
-    insights.append(f"**Kurtosis ({kurtosis:.4f})**: The distribution has {kurt_text}")
+    with col2:
+        # Kurtosis interpretation
+        kurtosis = col_data.kurtosis()
+        if abs(kurtosis) < 1:
+            kurt_text = "normal-like tails"
+        elif kurtosis > 1:
+            kurt_text = "heavy tails (more outliers)"
+        else:
+            kurt_text = "light tails (fewer outliers)"
+        st.markdown(f"**Kurtosis ({kurtosis:.4f})**")
+        st.write(f"Distribution has {kurt_text}")
     
-    # Outlier detection using IQR method
-    Q1 = col_data.quantile(0.25)
-    Q3 = col_data.quantile(0.75)
-    IQR = Q3 - Q1
-    outlier_count = ((col_data < (Q1 - 1.5 * IQR)) | (col_data > (Q3 + 1.5 * IQR))).sum()
-    outlier_pct = (outlier_count / len(col_data)) * 100
-    insights.append(f"**Outliers (IQR method)**: {outlier_count} outliers ({outlier_pct:.2f}% of data)")
-    
-    for insight in insights:
-        st.markdown(insight)
+    with col3:
+        # Outlier detection using IQR method
+        Q1 = col_data.quantile(0.25)
+        Q3 = col_data.quantile(0.75)
+        IQR = Q3 - Q1
+        outlier_count = ((col_data < (Q1 - 1.5 * IQR)) | (col_data > (Q3 + 1.5 * IQR))).sum()
+        outlier_pct = (outlier_count / len(col_data)) * 100
+        st.markdown(f"**Outliers (IQR method)**")
+        st.write(f"{outlier_count} outliers ({outlier_pct:.2f}%)")
 
 # Footer
 st.markdown("---")
