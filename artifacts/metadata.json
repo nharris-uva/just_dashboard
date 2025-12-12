@@ -1,0 +1,19 @@
+{
+  "feature_columns": [
+    "log_budget",
+    "log_revenue",
+    "log_vote_count",
+    "log_user_rating_count",
+    "log_keyword_count",
+    "runtime"
+  ],
+  "train_shape": [
+    6762,
+    6
+  ],
+  "valid_shape": [
+    2255,
+    6
+  ],
+  "notes": "Models trained on scaled numeric features; scaler must be applied before inference."
+}
